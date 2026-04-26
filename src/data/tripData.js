@@ -20,7 +20,7 @@ export const DEFAULT_TRIP_DATA = {
       seats: "확인 필요",
       baggage: "위탁수하물 15kg 포함",
       note: "도착 후 렌터카 인수 (17:30)",
-      voucherImage: "/assets/tickets/flight_out.jpg"
+      voucherImage: "assets/tickets/flight_out.jpg"
     },
     inbound: {
       id: "flight-in",
@@ -34,7 +34,7 @@ export const DEFAULT_TRIP_DATA = {
       seats: "확인 필요",
       baggage: "위탁수하물 15kg 포함",
       note: "전날 공항 근처 숙박 → 도보 or 택시 이동. 체크인 시작 06:40, 공항 도착 목표 07:10",
-      voucherImage: "/assets/tickets/flight_in.jpg"
+      voucherImage: "assets/tickets/flight_in.jpg"
     },
   },
   carRental: {
@@ -50,7 +50,7 @@ export const DEFAULT_TRIP_DATA = {
     returnDate: "2026-05-04",
     returnTime: "20:00",
     pickupGuide: "공항 GATE 5번 -> 렌터카하우스 앞 -> 5번구역 13번",
-    voucherImage: "/assets/tickets/car.jpg",
+    voucherImage: "assets/tickets/car.jpg",
     drivingPlan: [
       { day: "Day 1", note: "저녁 운전 최소화" },
       { day: "Day 2", note: "동부 장거리 (우도 방면)" },
