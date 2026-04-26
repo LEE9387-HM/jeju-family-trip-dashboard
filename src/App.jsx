@@ -199,7 +199,7 @@ export default function App() {
       cloud: '클라우드 동기화됨',
       ready: '클라우드 준비됨',
       local: '로컬 저장 모드',
-      error: '로컬 저장 중',
+      error: '클라우드 오류 · 로컬 저장',
     }[syncState];
 
   return (
