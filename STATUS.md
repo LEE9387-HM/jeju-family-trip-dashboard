@@ -1,8 +1,8 @@
 # STATUS: jeju-family-trip
 
-- **Last Updated**: 2026-04-26
+- **Last Updated**: 2026-04-27
 - **Current Milestone**: v2.4 — GitHub Pages Blank Screen Fix & Plan Page Upgrade
-- **Health**: Yellow — local production preview fixed, remote GitHub Pages redeploy pending
+- **Health**: Green for GitHub Pages render, Yellow for Supabase sync follow-up
 
 ## 완료된 작업
 - **Vite + React**: Glassmorphism 다크 모드 프리미엄 UI 완성.
@@ -22,15 +22,18 @@
   - 모바일/데스크톱 스크린샷 기준으로 텍스트 겹침 없이 렌더링 확인.
 
 ## 현재 상태
-- GitHub Pages 현재 배포본의 HTML, JS, CSS, 예약증 이미지 URL은 200 응답 확인.
-- 화면 미출력의 직접 원인은 경로 404보다 React 런타임 예외 가능성이 높음.
-- 로컬 production preview는 `http://127.0.0.1:4173/jeju-family-trip-dashboard/`에서 정상 렌더링 확인.
-- 원격 GitHub Pages에는 아직 이번 로컬 수정이 배포되지 않음. 커밋/푸시 후 GitHub Actions 재배포 필요.
+- GitHub Pages 재배포 완료.
+- 배포 커밋: `a33f96c75df3da5c90b99c022aaa2360ea5355ce` (`Fix Pages render and plan UI`)
+- GitHub Actions run `24960097815`: `Deploy to GitHub Pages` success.
+- 실제 Pages URL에서 새 번들 `index-DDdeJz7_.js`, `index-CETEYt0n.css` 로드 확인.
+- 데스크톱/모바일 원격 Pages 스크린샷에서 첫 화면과 여행 계획 개요 정상 출력 확인.
+- 화면 미출력의 직접 원인은 경로 404보다 React 런타임 예외 가능성이 높았고, 현재는 해결됨.
+- Supabase 동기화 뱃지는 배포 화면에서 `로컬 저장 중`으로 표시되어 Secrets/RLS/row 접근은 후속 점검 필요.
 
 ## 남은 작업
-- [ ] 수정본 커밋 및 `main` 브랜치 푸시.
-- [ ] GitHub Actions Pages 배포 완료 후 `https://lee9387-hm.github.io/jeju-family-trip-dashboard/` 재확인.
-- [ ] Supabase RLS 정책 최종 점검.
+- [x] 수정본 커밋 및 `main` 브랜치 푸시.
+- [x] GitHub Actions Pages 배포 완료 후 `https://lee9387-hm.github.io/jeju-family-trip-dashboard/` 재확인.
+- [ ] Supabase Secrets/RLS/`trips.main-trip` 접근 상태 최종 점검.
 
 ## 검증 결과
 - `npm run lint`: 성공
@@ -41,3 +44,7 @@
   - `/assets/index-BgGv9wHf.js`: 200
   - `/assets/index-C5I1QGqK.css`: 200
   - `/assets/tickets/flight_out.jpg`: 200
+- 원격 재배포 검증:
+  - `https://lee9387-hm.github.io/jeju-family-trip-dashboard/?v=a33f96c`: 새 HTML 번들 해시 확인.
+  - `npx playwright screenshot --wait-for-selector="h1" ... remote-pages-desktop.png`: 성공.
+  - `npx playwright screenshot --wait-for-selector="h1" ... remote-pages-mobile.png`: 성공.
