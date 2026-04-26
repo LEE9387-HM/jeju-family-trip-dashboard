@@ -113,19 +113,26 @@ export default function App() {
             .from('trips')
             .select('content')
             .eq('id', 'main-trip')
-            .single();
+            .maybeSingle();
 
           if (error) throw error;
-          
+
           if (data && data.content) {
             const cloudData = normalizeTripData(data.content);
             if (!cloudData.meta.version || cloudData.meta.version < DEFAULT_TRIP_DATA.meta.version) {
               console.warn('Cloud data is outdated. Syncing local default (v' + DEFAULT_TRIP_DATA.meta.version + ') to cloud.');
-              syncToCloud(DEFAULT_TRIP_DATA, { silent: true });
+              const resetData = normalizeTripData(DEFAULT_TRIP_DATA);
+              setTripData(resetData);
+              saveTrip(resetData);
+              const synced = await syncToCloud(resetData, { silent: true });
+              if (!synced) return;
             } else {
               setTripData(cloudData);
               saveTrip(cloudData);
             }
+          } else {
+            const synced = await syncToCloud(localData, { silent: true });
+            if (!synced) return;
           }
           setSyncState('cloud');
         } catch (e) {
