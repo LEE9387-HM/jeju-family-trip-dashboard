@@ -1,50 +1,62 @@
 # STATUS: jeju-family-trip
 
 - **Last Updated**: 2026-04-27
-- **Current Milestone**: v2.4 — GitHub Pages Blank Screen Fix & Plan Page Upgrade
-- **Health**: Green for GitHub Pages render, Yellow for Supabase sync follow-up
+- **Current Milestone**: v2.6 - Mobile Timeline Plan & Pages Redeploy
+- **Health**: Green for GitHub Pages rendering and itinerary UI, Yellow for Supabase backend/table access
 
 ## 완료된 작업
-- **Vite + React**: Glassmorphism 다크 모드 프리미엄 UI 완성.
-- **Supabase 연동**: `supabaseClient.js` 구축 및 버전 관리 기반 실시간 동기화 완료 (v2.3).
-- **데이터 정밀 수정**: 항공권/렌터카 이미지 4종 분석을 통한 100% 데이터 매칭 (진에어, 이스타, 보고타렌트카).
-- **예약증 임베딩**: `public/assets/tickets/` 내 예약증 이미지를 앱에서 바로 확인 가능.
-- **GitHub 연동**: `jeju-family-trip-dashboard` 비공개 저장소 생성 및 코드 푸시 완료.
-- **CI/CD 설정**: GitHub Actions를 통한 자동 배포 환경 구축.
-- **배포 화면 미출력 원인 수정**:
-  - `Sections.jsx`의 `useState` 미 import로 인한 런타임 크래시 제거.
-  - `carRental.checklist`, `accommodations.strategy`, 식당 우선순위 등 데이터 스키마 누락으로 렌더링이 깨지지 않도록 기본 데이터와 컴포넌트를 보강.
-  - `App.jsx`에서 로컬/클라우드 데이터를 기본 데이터와 병합해 오래된 localStorage 또는 Supabase 데이터가 화면을 깨지 않도록 정규화.
-  - 예약증 이미지 경로를 `import.meta.env.BASE_URL` 기준으로 해석해 GitHub Pages 하위 경로에서도 안정적으로 로드.
-- **계획서형 UX 보강**:
-  - 첫 화면을 여행 계획서 구조로 재설계.
-  - 여행 개요, 출발 전 확인, 가족 동선 원칙, 빠른 섹션 내비게이션 추가.
-  - 모바일/데스크톱 스크린샷 기준으로 텍스트 겹침 없이 렌더링 확인.
+- **배포 화면 출력 복구**
+  - `Sections.jsx`의 `useState` 미 import와 오래된 데이터 스키마로 인한 런타임 렌더링 실패를 수정했다.
+  - GitHub Pages 하위 경로에서 예약 이미지와 번들이 안정적으로 로드되도록 보강했다.
+- **여행 계획 데이터 전면 갱신**
+  - `meta.version`을 `2.5`로 올려 오래된 localStorage/Supabase 데이터보다 새 기본 일정이 우선되도록 했다.
+  - 렌터카 카시트 정보를 `업체 제공 없음 · 휴대용 카시트/유모차 직접 지참`으로 정정했다.
+  - 1일차부터 6일차까지 시간 단위 `timeBlocks`를 추가했다.
+  - 우도, 마라도, 중문권, 한림/협재권, 렌터카 반납 동선을 촘촘한 관광형 일정으로 재구성했다.
+  - 사용자 제공 숙소 링크와 갈치조림 링크를 데이터에 반영했다.
+- **모바일 중심 UI 개편**
+  - 상단 여행 달력에서 날짜를 누르면 해당 일자 일정으로 이동하도록 구성했다.
+  - 탭형 요약 일정을 전체 스크롤형 시간표로 교체했다.
+  - 각 일정 블록에 시간, 상태, 분류, 장소, 메모, 지도/링크 버튼을 표시한다.
+  - Apple-inspired 밝은 배경, 얇은 구분선, 시스템 폰트, 압축 카드, 모바일 가로 스크롤 네비게이션으로 정리했다.
+- **참고 자료 정리**
+  - `docs/jeju-itinerary-references-2026-04-27.md`에 웹 참고 링크를 남겼다.
+  - 동일 문서를 `C:\WorkSpace\메모\RAW\01. inbox\jeju-itinerary-references-2026-04-27.md`로 복사했다.
+- **Supabase fallback 보강**
+  - `main-trip` row가 없는 경우 `.maybeSingle()` 기반으로 기본 데이터를 upsert하도록 보강했다.
+  - 클라우드 오류 상태 문구를 `클라우드 오류 · 로컬 저장`으로 명확히 바꿨다.
 
 ## 현재 상태
-- GitHub Pages 재배포 완료.
-- 배포 커밋: `a33f96c75df3da5c90b99c022aaa2360ea5355ce` (`Fix Pages render and plan UI`)
-- GitHub Actions run `24960097815`: `Deploy to GitHub Pages` success.
-- 실제 Pages URL에서 새 번들 `index-DDdeJz7_.js`, `index-CETEYt0n.css` 로드 확인.
-- 데스크톱/모바일 원격 Pages 스크린샷에서 첫 화면과 여행 계획 개요 정상 출력 확인.
-- 화면 미출력의 직접 원인은 경로 404보다 React 런타임 예외 가능성이 높았고, 현재는 해결됨.
-- Supabase 동기화 뱃지는 배포 화면에서 `로컬 저장 중`으로 표시되어 Secrets/RLS/row 접근은 후속 점검 필요.
+- 최신 배포 커밋: `1270bcf095e9fac867ba8733615103b929f89b99`
+- GitHub Actions run: `24961649385` (`Deploy to GitHub Pages`) success
+- 실제 Pages URL: `https://lee9387-hm.github.io/jeju-family-trip-dashboard/`
+- 캐시 우회 확인 URL: `https://lee9387-hm.github.io/jeju-family-trip-dashboard/?v=1270bcf`
+- 원격 HTML에서 최신 번들 로드 확인:
+  - `assets/index-5bOhcoTI.js`
+  - `assets/index-B6iZJhF7.css`
+- 원격 모바일 스크린샷:
+  - `output/playwright/remote-apple-mobile-current.png`
+  - `output/playwright/remote-apple-mobile-day5-current.png`
 
-## 남은 작업
-- [x] 수정본 커밋 및 `main` 브랜치 푸시.
-- [x] GitHub Actions Pages 배포 완료 후 `https://lee9387-hm.github.io/jeju-family-trip-dashboard/` 재확인.
-- [ ] Supabase Secrets/RLS/`trips.main-trip` 접근 상태 최종 점검.
+## Supabase 상태
+- `.env`와 배포 Secret 주입은 값 노출 없이 확인했다.
+- Supabase REST 확인 결과:
+  - `/rest/v1/`는 익명 키로 service role 전용 endpoint라 401이 정상적으로 발생한다.
+  - `/rest/v1/trips?select=id&limit=1`는 404가 발생했다.
+- 따라서 남은 문제는 프론트 렌더링이 아니라 Supabase 프로젝트의 `trips` 테이블 존재 여부, API schema 노출, RLS/policy, 또는 Secret 값 정확성 확인이다.
+- 앱은 현재 `클라우드 오류 · 로컬 저장` 상태로 정상 사용 가능하다.
 
 ## 검증 결과
 - `npm run lint`: 성공
 - `npm run build`: 성공
-- `npx playwright screenshot --viewport-size="1440,1200" --wait-for-timeout=3000 http://127.0.0.1:4173/jeju-family-trip-dashboard/ output/playwright/local-preview-desktop-wait.png`: 성공
-- `npx playwright screenshot --viewport-size="390,1200" http://127.0.0.1:4173/jeju-family-trip-dashboard/ output/playwright/local-preview-mobile.png`: 성공
-- 배포 URL 자산 확인:
-  - `/assets/index-BgGv9wHf.js`: 200
-  - `/assets/index-C5I1QGqK.css`: 200
-  - `/assets/tickets/flight_out.jpg`: 200
-- 원격 재배포 검증:
-  - `https://lee9387-hm.github.io/jeju-family-trip-dashboard/?v=a33f96c`: 새 HTML 번들 해시 확인.
-  - `npx playwright screenshot --wait-for-selector="h1" ... remote-pages-desktop.png`: 성공.
-  - `npx playwright screenshot --wait-for-selector="h1" ... remote-pages-mobile.png`: 성공.
+- 로컬 production preview `http://127.0.0.1:4173/jeju-family-trip-dashboard/`: 200
+- Playwright 로컬 모바일/데스크톱 캡처: 성공
+- GitHub Actions Pages 배포: 성공
+- 원격 Pages HTML/JS/CSS 확인: 성공
+- 원격 Pages 모바일 날짜 해시 이동 `#day-5`: 성공
+
+## 남은 작업
+- [ ] Supabase 대시보드 또는 service role 권한으로 `trips` 테이블 존재 여부 확인.
+- [ ] `SUPABASE_SCHEMA.sql` 기준으로 테이블/RLS/policy가 실제 프로젝트에 적용되어 있는지 확인.
+- [ ] GitHub Secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`가 현재 Supabase 프로젝트와 일치하는지 값 노출 없이 재확인.
+
