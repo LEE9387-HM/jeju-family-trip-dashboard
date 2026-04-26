@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { openNaverMap, getDayTypeLabel, getDayTypeBadgeClass } from '../utils/tripUtils';
 
 function resolvePublicAsset(src) {
@@ -19,6 +18,46 @@ function starCount(priority) {
   return Math.max(0, Math.min(String(priority || '').split('★').length - 1, 5));
 }
 
+function toneClass(tone) {
+  return {
+    critical: 'tone-critical',
+    primary: 'tone-primary',
+    warning: 'tone-warning',
+    neutral: 'tone-neutral',
+  }[tone] || 'tone-neutral';
+}
+
+function statusLabel(status) {
+  return {
+    fixed: '확정',
+    planned: '계획',
+    check: '확인',
+    option: '후보',
+  }[status] || status || '계획';
+}
+
+function categoryLabel(category) {
+  return {
+    arrival: '도착',
+    cafe: '카페',
+    car: '차량',
+    check: '확인',
+    ferry: '선박',
+    grocery: '장보기',
+    market: '시장',
+    meal: '식사',
+    move: '이동',
+    option: '대체',
+    prep: '준비',
+    sight: '관광',
+    stay: '숙소',
+  }[category] || category || '일정';
+}
+
+function blockMapQuery(block) {
+  return block.mapQuery || block.place || block.title || '제주도';
+}
+
 function VoucherImage({ src, label }) {
   if (!src) return null;
   const imageSrc = resolvePublicAsset(src);
@@ -31,26 +70,6 @@ function VoucherImage({ src, label }) {
           <span>원본 보기</span>
         </div>
       </button>
-    </div>
-  );
-}
-
-function MapComponent({ query, title }) {
-  const mapQuery = query || title || '제주도';
-  return (
-    <div className="map-container">
-      <div className="map-placeholder">
-        <div className="map-placeholder-icon pulse">위치</div>
-        <p className="map-title">{title || '위치 정보'}</p>
-        <p className="map-query">{mapQuery}</p>
-        <button 
-          className="map-link" 
-          type="button"
-          onClick={() => openNaverMap(mapQuery)}
-        >
-          네이버 지도로 보기
-        </button>
-      </div>
     </div>
   );
 }
@@ -70,8 +89,33 @@ function EditableText({ value, path, editMode, onUpdate, tag: Tag = 'span', clas
   );
 }
 
+export function DayCalendarSection({ itinerary }) {
+  const days = Array.isArray(itinerary) ? itinerary : [];
+
+  return (
+    <section className="day-calendar-section" id="calendar" aria-label="여행 달력">
+      <div className="calendar-heading">
+        <span className="eyebrow">여행 달력</span>
+        <strong>6일 압축 동선</strong>
+      </div>
+      <div className="calendar-strip">
+        {days.map((day, index) => (
+          <a className="calendar-day" href={`#${day.id}`} key={day.id}>
+            <span className="calendar-index">{index + 1}일차</span>
+            <strong>{day.shortDate || day.date}</strong>
+            <span>{day.weekday || ''}</span>
+            <em>{day.anchors?.slice(0, 2).join(' · ') || day.title}</em>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function PlanOverviewSection({ tripData }) {
   const itinerary = Array.isArray(tripData.itinerary) ? tripData.itinerary : [];
+  const notes = Array.isArray(tripData.planningNotes) ? tripData.planningNotes : [];
+  const travelers = tripData.meta?.travelers || { adults: 0, children: 0 };
   const startDate = itinerary[0]?.date;
   const endDate = itinerary[itinerary.length - 1]?.date;
   const today = new Date();
@@ -83,6 +127,7 @@ export function PlanOverviewSection({ tripData }) {
   const dDayLabel = dDay === null ? '일정 확정' : dDay > 0 ? `D-${dDay}` : dDay === 0 ? 'D-Day' : '여행 완료';
   const mainStay = tripData.accommodations?.[0]?.name || '메인 숙소';
   const finalStay = tripData.accommodations?.[tripData.accommodations.length - 1]?.name || mainStay;
+  const eventCount = itinerary.reduce((count, day) => count + (Array.isArray(day.timeBlocks) ? day.timeBlocks.length : 0), 0);
 
   return (
     <section className="section plan-overview" id="overview">
@@ -95,38 +140,28 @@ export function PlanOverviewSection({ tripData }) {
         </article>
         <article className="stat-card">
           <span className="stat-label">여행 인원</span>
-          <strong>{tripData.meta.travelers.adults + tripData.meta.travelers.children}명</strong>
-          <p>성인 {tripData.meta.travelers.adults} · 소아 {tripData.meta.travelers.children}</p>
+          <strong>{travelers.adults + travelers.children}명</strong>
+          <p>성인 {travelers.adults} · 소아 {travelers.children}</p>
+        </article>
+        <article className="stat-card">
+          <span className="stat-label">일정 밀도</span>
+          <strong>{eventCount}개 블록</strong>
+          <p>{tripData.meta?.mode || '가족 여행 일정'}</p>
         </article>
         <article className="stat-card">
           <span className="stat-label">숙박 전략</span>
           <strong>{mainStay}</strong>
           <p>복귀 전날 {finalStay} 이동</p>
         </article>
-        <article className="stat-card">
-          <span className="stat-label">운전 계획</span>
-          <strong>{tripData.carRental.model}</strong>
-          <p>{tripData.carRental.pickupTime} 인수 · {tripData.carRental.returnTime} 반납</p>
-        </article>
       </div>
 
-      <div className="planning-board">
-        <article className="board-panel">
-          <h3>출발 전 확인</h3>
-          <ul className="priority-list">
-            <li>좌석 배정과 위탁수하물 기준 재확인</li>
-            <li>렌터카 카시트와 인수 위치 확인</li>
-            <li>05/05 조기 비행 기준 공항 도착 시간 역산</li>
-          </ul>
-        </article>
-        <article className="board-panel">
-          <h3>가족 동선 원칙</h3>
-          <ul className="priority-list">
-            <li>도착일 저녁 운전 최소화</li>
-            <li>장거리 이동일 다음에는 회복 여백 확보</li>
-            <li>날씨 변수는 실내 후보와 카페 휴식으로 흡수</li>
-          </ul>
-        </article>
+      <div className="planning-notes">
+        {notes.map((note) => (
+          <article className={`note-panel ${toneClass(note.tone)}`} key={note.title}>
+            <h3>{note.title}</h3>
+            <p>{note.body}</p>
+          </article>
+        ))}
       </div>
     </section>
   );
@@ -169,12 +204,12 @@ export function FlightSection({ flights, editMode, onUpdate }) {
         ))}
         <div className="info-row">
           <span className="info-label">비고</span>
-          <span className="info-value" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            <EditableText 
-              value={flight.note || ''} 
-              path={['flights', flightKey, 'note']} 
-              editMode={editMode} 
-              onUpdate={onUpdate} 
+          <span className="info-value muted">
+            <EditableText
+              value={flight.note || ''}
+              path={['flights', flightKey, 'note']}
+              editMode={editMode}
+              onUpdate={onUpdate}
             />
           </span>
         </div>
@@ -236,7 +271,7 @@ export function CarRentalSection({ car, editMode, onUpdate }) {
           </div>
           <div className="checklist">
             {checklist.map((c, i) => (
-              <div className="check-item" key={i}>
+              <div className="check-item" key={c.item || i}>
                 <span className={`check-icon ${c.required ? 'required' : ''}`}>{c.required ? '필수' : '선택'}</span>
                 <EditableText value={c.item} path={['carRental', 'checklist', i, 'item']} editMode={editMode} onUpdate={onUpdate} />
               </div>
@@ -245,7 +280,7 @@ export function CarRentalSection({ car, editMode, onUpdate }) {
           <h4 className="subsection-label">운전 계획</h4>
           <div className="drive-plan">
             {drivingPlan.map((d, i) => (
-              <div className="drive-row" key={i}>
+              <div className="drive-row" key={d.day || i}>
                 <span className="drive-day">{d.day}</span>
                 <EditableText value={d.note} path={['carRental', 'drivingPlan', i, 'note']} editMode={editMode} onUpdate={onUpdate} className="drive-note" />
               </div>
@@ -259,12 +294,13 @@ export function CarRentalSection({ car, editMode, onUpdate }) {
 }
 
 export function AccommodationSection({ accommodations, editMode, onUpdate }) {
+  const stays = Array.isArray(accommodations) ? accommodations : [];
   return (
     <section className="section" id="stays">
       <h2 className="section-title">숙소</h2>
       <div className="grid-2">
-        {accommodations.map((stay, idx) => (
-          <div className="card" key={stay.id}>
+        {stays.map((stay, idx) => (
+          <div className="card" key={stay.id || stay.name}>
             <div className="card-topline">
               <div>
                 <h3>
@@ -283,22 +319,26 @@ export function AccommodationSection({ accommodations, editMode, onUpdate }) {
                 <div className="info-row" key={key}>
                   <span className="info-label">{label}</span>
                   <span className="info-value">
-                    <EditableText value={String(stay[key])} path={['accommodations', idx, key]} editMode={editMode} onUpdate={onUpdate} />
+                    <EditableText value={String(stay[key] || '')} path={['accommodations', idx, key]} editMode={editMode} onUpdate={onUpdate} />
                   </span>
                 </div>
               ))}
             </div>
             {Array.isArray(stay.strategy) && stay.strategy.length > 0 && (
-              <div className="chips" style={{ marginTop: '1rem' }}>
-                {stay.strategy.map((s, i) => <span key={i} className="chip">{s}</span>)}
+              <div className="chips">
+                {stay.strategy.map((s) => <span key={s} className="chip">{s}</span>)}
               </div>
             )}
-            <button
-              className="map-link"
-              onClick={() => openNaverMap(stay.name)}
-            >
-              네이버 지도
-            </button>
+            <div className="action-row">
+              <button className="map-link" type="button" onClick={() => openNaverMap(stay.mapQuery || stay.name)}>
+                네이버 지도
+              </button>
+              {stay.link && (
+                <a className="map-link secondary" href={stay.link} target="_blank" rel="noreferrer">
+                  저장 링크
+                </a>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -307,19 +347,20 @@ export function AccommodationSection({ accommodations, editMode, onUpdate }) {
 }
 
 export function RestaurantSection({ restaurants, editMode, onUpdate }) {
+  const items = Array.isArray(restaurants) ? restaurants : [];
   return (
     <section className="section" id="restaurants">
       <h2 className="section-title">식사 후보</h2>
-      <div className="grid-3">
-        {restaurants.map((rest, idx) => (
-          <div className="card" key={rest.id}>
-            <div className="card-topline">
+      <div className="grid-3 restaurant-grid">
+        {items.map((rest, idx) => (
+          <div className="card restaurant-card" key={rest.id || rest.name}>
+            <div className="card-topline compact">
               <h3>
                 <EditableText value={rest.name} path={['restaurants', idx, 'name']} editMode={editMode} onUpdate={onUpdate} />
               </h3>
               <span className="badge badge-rest">{rest.meal}</span>
             </div>
-            <div className="info-row" style={{ marginBottom: '0.3rem' }}>
+            <div className="info-row">
               <span className="info-label">위치</span>
               <span className="info-value">
                 <EditableText value={rest.location} path={['restaurants', idx, 'location']} editMode={editMode} onUpdate={onUpdate} />
@@ -337,14 +378,21 @@ export function RestaurantSection({ restaurants, editMode, onUpdate }) {
                 <EditableText value={rest.note} path={['restaurants', idx, 'note']} editMode={editMode} onUpdate={onUpdate} />
               </span>
             </div>
-            <div className="rest-priority">
+            <div className="rest-priority" aria-label={`우선순위 ${starCount(rest.priority)}점`}>
               {Array.from({ length: 5 }, (_, i) => (
                 <span key={i} className={`star ${i < starCount(rest.priority) ? '' : 'empty'}`}>★</span>
               ))}
             </div>
-            <button className="map-link" type="button" onClick={() => openNaverMap(rest.mapQuery || rest.name)}>
-              네이버 지도
-            </button>
+            <div className="action-row">
+              <button className="map-link" type="button" onClick={() => openNaverMap(rest.mapQuery || rest.name)}>
+                네이버 지도
+              </button>
+              {rest.link && (
+                <a className="map-link secondary" href={rest.link} target="_blank" rel="noreferrer">
+                  저장 링크
+                </a>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -352,97 +400,130 @@ export function RestaurantSection({ restaurants, editMode, onUpdate }) {
   );
 }
 
+function TimelineBlock({ block, dayIndex, blockIndex, editMode, onUpdate }) {
+  const hasAction = block.mapQuery || block.place || block.link;
+  return (
+    <li className={`timeline-row status-${block.status || 'planned'} category-${block.category || 'default'}`}>
+      <div className="time-column">
+        <strong>{block.time}</strong>
+        <span>{block.end}</span>
+      </div>
+      <div className="timeline-main">
+        <div className="timeline-meta">
+          <span className="category-pill">{categoryLabel(block.category)}</span>
+          <span className={`status-pill status-${block.status || 'planned'}`}>{statusLabel(block.status)}</span>
+        </div>
+        <h4>
+          <EditableText
+            value={block.title}
+            path={['itinerary', dayIndex, 'timeBlocks', blockIndex, 'title']}
+            editMode={editMode}
+            onUpdate={onUpdate}
+          />
+        </h4>
+        <p className="timeline-place">{block.place}</p>
+        {block.note && (
+          <p className="timeline-note">
+            <EditableText
+              value={block.note}
+              path={['itinerary', dayIndex, 'timeBlocks', blockIndex, 'note']}
+              editMode={editMode}
+              onUpdate={onUpdate}
+            />
+          </p>
+        )}
+      </div>
+      {hasAction && (
+        <div className="timeline-actions">
+          <button className="map-link" type="button" onClick={() => openNaverMap(blockMapQuery(block))}>
+            지도
+          </button>
+          {block.link && (
+            <a className="map-link secondary" href={block.link} target="_blank" rel="noreferrer">
+              링크
+            </a>
+          )}
+        </div>
+      )}
+    </li>
+  );
+}
+
 export function ItinerarySection({ itinerary, editMode, onUpdate }) {
-  const [activeTab, setActiveTab] = useState('Summary');
-
-  const tabs = ['Summary', ...itinerary.map(day => day.label)];
-
-  const activeDay = itinerary.find(d => d.label === activeTab);
-  const activeDayIndex = activeDay ? itinerary.findIndex(d => d.id === activeDay.id) : -1;
+  const days = Array.isArray(itinerary) ? itinerary : [];
 
   return (
-    <section className="section" id="itinerary">
-      <h2 className="section-title">일정표</h2>
-      
-      <div className="tab-container">
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === 'Summary' ? '전체 요약' : tab}
-          </button>
+    <section className="section itinerary-section" id="itinerary">
+      <h2 className="section-title">시간표</h2>
+      <div className="route-summary">
+        {days.map((day) => (
+          <a className="route-chip" href={`#${day.id}`} key={day.id}>
+            <strong>{day.label}</strong>
+            <span>{day.anchors?.join(' · ') || day.title}</span>
+          </a>
         ))}
       </div>
 
-      <div className="itinerary-content">
-        {activeTab === 'Summary' ? (
-          <div className="itinerary-grid">
-            <div className="card">
-              <h3 className="card-section-title">여행 경로 요약</h3>
-              <div className="info-grid">
-                {itinerary.map((day, idx) => (
-                  <div key={day.id} className="info-row route-summary-row">
-                    <span className="info-label compact-label">{day.label}</span>
-                    <span className="info-value">
-                      <EditableText value={day.title} path={['itinerary', idx, 'title']} editMode={editMode} onUpdate={onUpdate} />
-                    </span>
-                  </div>
-                ))}
+      <div className="day-stack">
+        {days.map((day, dayIndex) => {
+          const blocks = Array.isArray(day.timeBlocks) ? day.timeBlocks : [];
+          return (
+            <article className="day-plan" id={day.id} key={day.id}>
+              <div className="day-plan-header">
+                <div>
+                  <span className="day-label">{day.label} · {day.shortDate || day.date} {day.weekday || ''}</span>
+                  <h3>
+                    <EditableText
+                      value={day.title}
+                      path={['itinerary', dayIndex, 'title']}
+                      editMode={editMode}
+                      onUpdate={onUpdate}
+                    />
+                  </h3>
+                </div>
+                <div className="day-badges">
+                  <span className={`badge ${getDayTypeBadgeClass(day.type)}`}>{getDayTypeLabel(day.type)}</span>
+                  <span className="badge badge-default">강도 {day.intensity}</span>
+                </div>
               </div>
-              <MapComponent query="제주도" title="전체 경로" />
-            </div>
-          </div>
-        ) : (
-          activeDay && (
-            <div className="itinerary-grid">
-              <div className="card day-card">
-                <div className="day-header">
-                  <span className="day-label">{activeDay.label}</span>
-                  <span className="day-title">
-                    <EditableText 
-                      value={activeDay.title} 
-                      path={['itinerary', activeDayIndex, 'title']}
+              <p className="day-route">{day.route}</p>
+              <div className="chips">
+                {(day.highlights || []).map((highlight, highlightIndex) => (
+                  <span className="chip" key={highlight}>
+                    <EditableText
+                      value={highlight}
+                      path={['itinerary', dayIndex, 'highlights', highlightIndex]}
                       editMode={editMode}
                       onUpdate={onUpdate}
                     />
                   </span>
-                  <span className={`badge ${getDayTypeBadgeClass(activeDay.type)}`}>{getDayTypeLabel(activeDay.type)}</span>
-                  <span className="day-date">{activeDay.date}</span>
-                </div>
-                <ul className="highlights-list">
-                  {activeDay.highlights.map((h, hi) => (
-                    <li key={hi}>
-                      <EditableText 
-                        value={h} 
-                        path={['itinerary', activeDayIndex, 'highlights', hi]}
-                        editMode={editMode}
-                        onUpdate={onUpdate}
-                      />
-                    </li>
-                  ))}
-                </ul>
-                {activeDay.note && (
-                  <div className="day-note">
-                    <EditableText 
-                      value={activeDay.note} 
-                      path={['itinerary', activeDayIndex, 'note']}
-                      editMode={editMode}
-                      onUpdate={onUpdate}
-                    />
-                  </div>
-                )}
-                
-                {/* Show map for the primary highlight of the day */}
-                <MapComponent 
-                  query={activeDay.highlights[0] || activeDay.title} 
-                  title={`${activeDay.label} 주요 장소`} 
-                />
+                ))}
               </div>
-            </div>
-          )
-        )}
+              {day.note && (
+                <div className="day-note">
+                  <EditableText
+                    value={day.note}
+                    path={['itinerary', dayIndex, 'note']}
+                    editMode={editMode}
+                    onUpdate={onUpdate}
+                  />
+                </div>
+              )}
+              <ol className="timeline-list">
+                {blocks.map((block, blockIndex) => (
+                  <TimelineBlock
+                    key={`${day.id}-${block.time}-${block.title}`}
+                    block={block}
+                    dayIndex={dayIndex}
+                    blockIndex={blockIndex}
+                    editMode={editMode}
+                    onUpdate={onUpdate}
+                  />
+                ))}
+              </ol>
+            </article>
+          );
+        })}
       </div>
     </section>
   );

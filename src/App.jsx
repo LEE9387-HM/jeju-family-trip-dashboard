@@ -3,6 +3,7 @@ import { DEFAULT_TRIP_DATA } from './data/tripData';
 import { saveTrip, loadTrip, exportJson } from './utils/tripUtils';
 import { supabase } from './utils/supabaseClient';
 import {
+  DayCalendarSection,
   PlanOverviewSection,
   FlightSection,
   CarRentalSection,
@@ -142,6 +143,25 @@ export default function App() {
     saveTrip(tripData);
   }, [tripData]);
 
+  useEffect(() => {
+    const scrollToHash = () => {
+      const id = window.location.hash.replace('#', '');
+      if (!id) return;
+      const scroll = () => {
+        const target = document.getElementById(id);
+        if (!target) return;
+        const stickyOffset = window.matchMedia('(max-width: 720px)').matches ? 244 : 168;
+        const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+      };
+      [80, 420, 900].forEach((delay) => window.setTimeout(scroll, delay));
+    };
+
+    scrollToHash();
+    window.addEventListener('hashchange', scrollToHash);
+    return () => window.removeEventListener('hashchange', scrollToHash);
+  }, [tripData.meta.version]);
+
   const handleUpdate = useCallback((path, value) => {
     setTripData(prev => {
       const next = normalizeTripData(setNestedValue(prev, path, value));
@@ -188,22 +208,24 @@ export default function App() {
           </div>
         </div>
         <div className="hero-plan-card">
-          <span className="plan-card-label">핵심 동선</span>
-          <strong>김포 → 제주 → 서귀포 거점 → 공항 전날 이동 → 김포</strong>
+          <span className="plan-card-label">핵심 전략</span>
+          <strong>{tripData.meta.mode || '서귀포 거점형 가족 여행'}</strong>
           <div className="hero-timeline">
             <span>항공</span>
             <span>렌터카</span>
-            <span>숙소</span>
-            <span>일정</span>
+            <span>섬 일정</span>
+            <span>시간표</span>
           </div>
         </div>
       </header>
 
       <nav className="quick-nav" aria-label="페이지 섹션 바로가기">
+        <a href="#calendar">달력</a>
         <a href="#overview">개요</a>
         <a href="#flights">항공</a>
         <a href="#car">렌터카</a>
         <a href="#stays">숙소</a>
+        <a href="#restaurants">식사</a>
         <a href="#itinerary">일정</a>
       </nav>
 
@@ -215,6 +237,7 @@ export default function App() {
         <button className="btn btn-reset" onClick={handleReset}>초기화</button>
       </div>
 
+      <DayCalendarSection itinerary={tripData.itinerary} />
       <PlanOverviewSection tripData={tripData} />
       <FlightSection flights={tripData.flights} editMode={editMode} onUpdate={handleUpdate} />
       <CarRentalSection car={tripData.carRental} editMode={editMode} onUpdate={handleUpdate} />
