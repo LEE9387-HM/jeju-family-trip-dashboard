@@ -44,6 +44,10 @@ export function getDayTypeLabel(type) {
     하이브리드: "🌟 핵심일",
     회복일: "😌 휴식일",
     날씨의존형: "🌦️ 날씨 의존",
+    arrival: "도착일",
+    activity: "핵심 일정",
+    rest: "회복일",
+    departure: "복귀일",
   };
   return map[type] || type;
 }
@@ -54,6 +58,10 @@ export function getDayTypeBadgeClass(type) {
     하이브리드: "badge-star",
     회복일: "badge-rest",
     날씨의존형: "badge-weather",
+    arrival: "badge-travel",
+    activity: "badge-star",
+    rest: "badge-rest",
+    departure: "badge-weather",
   };
   return map[type] || "badge-default";
 }
