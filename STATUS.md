@@ -39,12 +39,14 @@
   - `output/playwright/remote-apple-mobile-day5-current.png`
 
 ## Supabase 상태
-- `.env`와 배포 Secret 주입은 값 노출 없이 확인했다.
-- Supabase REST 확인 결과:
-  - `/rest/v1/`는 익명 키로 service role 전용 endpoint라 401이 정상적으로 발생한다.
-  - `/rest/v1/trips?select=id&limit=1`는 404가 발생했다.
-- 따라서 남은 문제는 프론트 렌더링이 아니라 Supabase 프로젝트의 `trips` 테이블 존재 여부, API schema 노출, RLS/policy, 또는 Secret 값 정확성 확인이다.
-- 앱은 현재 `클라우드 오류 · 로컬 저장` 상태로 정상 사용 가능하다.
+- **진단 결과**: REST API 호출(`curl.exe`) 결과 `PGRST205` 에러 확인.
+  - 에러 메시지: `"Could not find the table 'public.trips' in the schema cache"`
+  - 원인: Supabase 프로젝트에 `trips` 테이블이 존재하지 않거나 Schema Cache에 반영되지 않음.
+- **Secrets 검증**: `VITE_SUPABASE_URL` 및 `VITE_SUPABASE_ANON_KEY`는 유효함(프로젝트 식별 및 인증 통과 확인).
+- **조치 사항**:
+  - `SUPABASE_SCHEMA.sql`을 멱등성(idempotent) 있게 보강함.
+  - Supabase SQL Editor에서 보강된 `SUPABASE_SCHEMA.sql`을 실행하여 테이블 및 RLS 정책 생성 필요.
+  - 테이블 생성 후에도 404가 지속될 경우 `Settings > API > Reload Schema` 실행 필요.
 
 ## 검증 결과
 - `npm run lint`: 성공

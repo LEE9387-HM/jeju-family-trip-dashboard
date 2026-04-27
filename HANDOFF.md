@@ -41,22 +41,13 @@
 - 원격 Playwright 모바일 캡처와 `#day-5` 날짜 해시 이동 캡처가 성공했다.
 
 ## Remaining Risk
-- Supabase 동기화는 아직 클라우드 성공 상태가 아니다.
-- 값 노출 없이 REST 접근을 확인했을 때 `/rest/v1/trips?select=id&limit=1`가 404를 반환했다.
-- 따라서 남은 문제는 프론트 코드보다 Supabase 프로젝트의 `trips` 테이블 존재 여부, API schema 노출, RLS/policy, 또는 GitHub Secrets 값 정확성 확인에 있다.
-- 앱은 `클라우드 오류 · 로컬 저장` 상태로 정상 사용 가능하다.
-
-## Deployment Info
-- GitHub 저장소: `https://github.com/LEE9387-HM/jeju-family-trip-dashboard`
-- 배포 주소: `https://lee9387-hm.github.io/jeju-family-trip-dashboard/`
-- Vite base: `/jeju-family-trip-dashboard/`
-- Supabase 테이블 목표: `trips`, row id: `main-trip`
+- Supabase 동기화 실패 원인이 `public.trips` 테이블 누락(`PGRST205`)으로 확정됨.
+- GitHub Secrets 설정은 정상이나, 실제 DB 스키마가 구축되지 않은 상태임.
 
 ## Next Steps
-1. Supabase 대시보드 또는 service role 권한으로 `trips` 테이블이 실제로 존재하는지 확인한다.
-2. `SUPABASE_SCHEMA.sql` 기준으로 테이블/RLS/policy를 적용하거나 보정한다.
-3. GitHub Secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`가 현재 Supabase 프로젝트와 일치하는지 값 노출 없이 확인한다.
-4. 보정 후 Pages에서 뱃지가 `클라우드 동기화됨`으로 바뀌는지 확인한다.
+1. Supabase SQL Editor에서 보강된 `SUPABASE_SCHEMA.sql` 내용을 실행하여 `trips` 테이블과 RLS 정책을 생성한다.
+2. 테이블 생성 후 배포된 Pages(URL)에 접속하여 하단 상태바가 `클라우드 동기화됨` (또는 로딩 후 Ready)으로 바뀌는지 확인한다.
+3. 만약 404가 지속될 경우 Supabase 설정에서 Schema Cache를 Reload한다.
 
 ## Next Prompt
 `C:\WorkSpace\Coding\코딩\jeju-family-trip`에서 `STATUS.md`와 `HANDOFF.md`를 먼저 읽어줘. GitHub Pages 화면 출력과 모바일 시간표 UI 업그레이드는 `1270bcf` 배포로 완료됐고 원격 Pages에서 최신 번들 및 모바일 캡처까지 확인됐어. 이제 남은 것은 Supabase 클라우드 동기화야. 값 노출 없이 Supabase 프로젝트의 `trips` 테이블 존재 여부, API schema 노출, RLS/policy, GitHub Secrets 값을 점검하고, `SUPABASE_SCHEMA.sql` 기준으로 필요한 최소 보정안을 제시하거나 적용해줘.
