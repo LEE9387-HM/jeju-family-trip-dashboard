@@ -133,11 +133,11 @@ a {
 
 .hero-plan-card {
   align-self: end;
-  min-height: 196px;
+  min-height: 176px;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--bg-ink);
+  background: #202124;
   color: var(--text-inverse);
   display: flex;
   flex-direction: column;
@@ -151,7 +151,7 @@ a {
 .hero-plan-card strong {
   display: block;
   margin-top: 10px;
-  font-size: 1.28rem;
+  font-size: 1.18rem;
   line-height: 1.36;
 }
 
@@ -204,6 +204,24 @@ a {
   backdrop-filter: blur(16px);
 }
 
+.sync-status::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.sync-cloud::before {
+  background: var(--accent-green);
+}
+
+.sync-error::before {
+  background: var(--accent-orange);
+}
+
 .quick-nav {
   position: sticky;
   top: 0;
@@ -248,7 +266,13 @@ a {
   justify-content: flex-end;
   gap: 8px;
   margin: 0 0 16px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.72);
   flex-wrap: wrap;
+  width: fit-content;
+  margin-left: auto;
 }
 
 .btn {
@@ -288,9 +312,8 @@ a {
 }
 
 .day-calendar-section {
-  position: sticky;
-  top: 60px;
-  z-index: 15;
+  position: relative;
+  z-index: 5;
   margin-bottom: 24px;
   padding: 12px;
   border: 1px solid var(--border);
@@ -373,7 +396,7 @@ a {
 
 .section {
   margin-bottom: 30px;
-  scroll-margin-top: 188px;
+  scroll-margin-top: 96px;
 }
 
 .section-title {
@@ -919,7 +942,7 @@ a {
 
 .day-plan {
   padding: 20px;
-  scroll-margin-top: 190px;
+  scroll-margin-top: 96px;
 }
 
 .day-plan-header {
@@ -987,11 +1010,51 @@ a {
 }
 
 .timeline-row {
+  position: relative;
   display: grid;
   grid-template-columns: 84px minmax(0, 1fr) auto;
   gap: 14px;
   padding: 14px 0;
   border-top: 1px solid var(--border);
+}
+
+.timeline-row::before {
+  content: "";
+  position: absolute;
+  left: 93px;
+  top: 22px;
+  z-index: 1;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--bg-panel);
+  border-radius: 50%;
+  background: var(--accent-blue);
+  box-shadow: 0 0 0 1px rgba(0, 113, 227, 0.24);
+}
+
+.timeline-row:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 97px;
+  top: 34px;
+  bottom: -2px;
+  width: 1px;
+  background: rgba(0, 113, 227, 0.18);
+}
+
+.timeline-row.status-fixed::before {
+  background: var(--accent-green);
+  box-shadow: 0 0 0 1px rgba(36, 138, 61, 0.24);
+}
+
+.timeline-row.status-check::before {
+  background: var(--accent-orange);
+  box-shadow: 0 0 0 1px rgba(191, 106, 2, 0.24);
+}
+
+.timeline-row.status-option::before {
+  background: var(--text-muted);
+  box-shadow: 0 0 0 1px rgba(134, 134, 139, 0.22);
 }
 
 .timeline-row:first-child {
@@ -1201,14 +1264,18 @@ a {
   .toolbar {
     justify-content: stretch;
     margin-bottom: 12px;
+    width: 100%;
+    gap: 6px;
   }
 
   .btn {
-    flex: 1 1 120px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px;
+    font-size: 0.82rem;
   }
 
   .day-calendar-section {
-    top: 56px;
     padding: 10px;
     margin-bottom: 22px;
   }
@@ -1229,7 +1296,7 @@ a {
   }
 
   .section {
-    scroll-margin-top: 180px;
+    scroll-margin-top: 88px;
   }
 
   .flight-route {
@@ -1255,7 +1322,7 @@ a {
 
   .day-plan {
     padding: 16px;
-    scroll-margin-top: 184px;
+    scroll-margin-top: 88px;
   }
 
   .day-plan-header {
@@ -1274,6 +1341,16 @@ a {
     grid-template-columns: 68px minmax(0, 1fr);
     gap: 10px;
     padding: 13px 0;
+  }
+
+  .timeline-row::before {
+    left: 75px;
+    top: 21px;
+  }
+
+  .timeline-row:not(:last-child)::after {
+    left: 79px;
+    top: 33px;
   }
 
   .timeline-actions {

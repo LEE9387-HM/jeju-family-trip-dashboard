@@ -157,7 +157,7 @@ export default function App() {
       const scroll = () => {
         const target = document.getElementById(id);
         if (!target) return;
-        const stickyOffset = window.matchMedia('(max-width: 720px)').matches ? 244 : 168;
+        const stickyOffset = window.matchMedia('(max-width: 720px)').matches ? 84 : 92;
         const top = target.getBoundingClientRect().top + window.scrollY - stickyOffset;
         window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
       };
@@ -205,7 +205,7 @@ export default function App() {
   return (
     <div className={`app-shell ${editMode ? 'edit-mode' : ''}`}>
       <header className="hero">
-        <div className="sync-status">{syncStatusLabel}</div>
+        <div className={`sync-status sync-${syncState}`}>{syncStatusLabel}</div>
         <div className="hero-content">
           <p className="hero-kicker">Jeju Family Trip Plan</p>
           <h1>{tripData.meta.title}</h1>

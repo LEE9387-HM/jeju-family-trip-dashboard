@@ -2,9 +2,9 @@
 
 - updated_at: 2026-04-27
 - from_agent: codex-worker
-- to_agent: supabase-backend-or-qa-worker
-- role: backend sync follow-up
-- status: pages-redeploy-complete-itinerary-upgraded
+- to_agent: future-trip-editor
+- role: optional itinerary refinement
+- status: complete-pages-mobile-itinerary-supabase-connected
 
 ## Objective
 제주도 가족여행 React/Vite 앱의 배포 화면 출력 문제를 해결하고, 실제 휴대폰에서 보기 편한 시간 단위 가족여행 계획서로 업그레이드한다.
@@ -26,6 +26,7 @@
   - 클라우드 오류 상태 문구를 `클라우드 오류 · 로컬 저장`으로 명확히 바꿨다.
 - `src/styles/main.css`
   - Apple-inspired 밝은 시스템 배경, 절제된 검정 포인트, 얇은 구분선, 압축 카드, 모바일 우선 시간표 UI로 재정리했다.
+  - 객관 리뷰 후 동기화 뱃지 상태 점, compact toolbar, 타임라인 점/세로 라인, 날짜 해시 이동 offset을 보강했다.
 - `docs/jeju-itinerary-references-2026-04-27.md`
   - 일정 재구성에 사용한 웹 참고 링크를 남겼다.
   - 같은 파일을 메모 vault inbox로 복사했다.
@@ -39,16 +40,17 @@
 - GitHub Actions run `24961649385`가 성공했다.
 - 원격 Pages `https://lee9387-hm.github.io/jeju-family-trip-dashboard/?v=1270bcf`에서 최신 번들 `index-5bOhcoTI.js`, `index-B6iZJhF7.css` 로드를 확인했다.
 - 원격 Playwright 모바일 캡처와 `#day-5` 날짜 해시 이동 캡처가 성공했다.
+- 사용자가 Supabase SQL을 입력한 뒤 REST API로 `trips.main-trip` row 조회에 성공했다.
+- 배포 화면 동기화 뱃지가 `클라우드 동기화됨`으로 표시되는 것을 확인했다.
 
 ## Remaining Risk
-- Supabase 동기화 실패 원인이 `public.trips` 테이블 누락(`PGRST205`)으로 확정됨.
-- GitHub Secrets 설정은 정상이나, 실제 DB 스키마가 구축되지 않은 상태임.
+- 앱/배포/Supabase 동기화는 완료 상태다.
+- 여행 운영 리스크는 우도/마라도 페리 운항, 식당 운영시간/웨이팅, 아이 컨디션 변수다.
 
 ## Next Steps
-1. Supabase SQL Editor에서 보강된 `SUPABASE_SCHEMA.sql` 내용을 실행하여 `trips` 테이블과 RLS 정책을 생성한다.
-2. 테이블 생성 후 배포된 Pages(URL)에 접속하여 하단 상태바가 `클라우드 동기화됨` (또는 로딩 후 Ready)으로 바뀌는지 확인한다.
-3. 만약 404가 지속될 경우 Supabase 설정에서 Schema Cache를 Reload한다.
+1. 실제 여행 전날 우도/마라도 운항 여부와 식당 운영시간을 확인한다.
+2. 일정이 너무 빡빡하면 각 일자 `후보` 블록부터 제거한다.
+3. 추가 수정 시 `src/data/tripData.js`의 `meta.version`을 올려 배포 기본값 갱신을 보장한다.
 
 ## Next Prompt
-`C:\WorkSpace\Coding\코딩\jeju-family-trip`에서 `STATUS.md`와 `HANDOFF.md`를 먼저 읽어줘. GitHub Pages 화면 출력과 모바일 시간표 UI 업그레이드는 `1270bcf` 배포로 완료됐고 원격 Pages에서 최신 번들 및 모바일 캡처까지 확인됐어. 이제 남은 것은 Supabase 클라우드 동기화야. 값 노출 없이 Supabase 프로젝트의 `trips` 테이블 존재 여부, API schema 노출, RLS/policy, GitHub Secrets 값을 점검하고, `SUPABASE_SCHEMA.sql` 기준으로 필요한 최소 보정안을 제시하거나 적용해줘.
-
+`C:\WorkSpace\Coding\코딩\jeju-family-trip`에서 `STATUS.md`와 `HANDOFF.md`를 먼저 읽어줘. GitHub Pages 화면 출력, 모바일 시간표 UI, Supabase `main-trip` row 접근, 배포 화면 `클라우드 동기화됨` 상태까지 확인 완료됐어. 추가 수정이 필요하면 `src/data/tripData.js`의 일정 데이터와 `src/styles/main.css`의 모바일 UI만 좁게 수정하고, `npm run lint`, `npm run build`, Playwright 모바일 캡처 후 배포해줘.

@@ -1,8 +1,8 @@
 # STATUS: jeju-family-trip
 
 - **Last Updated**: 2026-04-27
-- **Current Milestone**: v2.6 - Mobile Timeline Plan & Pages Redeploy
-- **Health**: Green for GitHub Pages rendering and itinerary UI, Yellow for Supabase backend/table access
+- **Current Milestone**: v2.7 - Mobile Timeline Polish & Supabase Connected
+- **Health**: Green for GitHub Pages rendering, itinerary UI, and Supabase row access
 
 ## 완료된 작업
 - **배포 화면 출력 복구**
@@ -25,10 +25,15 @@
 - **Supabase fallback 보강**
   - `main-trip` row가 없는 경우 `.maybeSingle()` 기반으로 기본 데이터를 upsert하도록 보강했다.
   - 클라우드 오류 상태 문구를 `클라우드 오류 · 로컬 저장`으로 명확히 바꿨다.
+- **객관 리뷰 후 디자인 폴리시**
+  - 동기화 상태 뱃지에 상태 점을 추가했다.
+  - 모바일 관리 버튼을 한 줄 compact toolbar로 정리했다.
+  - 날짜 이동 시 달력이 화면을 과하게 가리지 않도록 sticky를 제거하고 해시 스크롤 offset을 조정했다.
+  - 일정 블록에 상태별 점과 세로 라인을 추가해 시간표 흐름을 더 명확하게 했다.
 
 ## 현재 상태
-- 최신 배포 커밋: `1270bcf095e9fac867ba8733615103b929f89b99`
-- GitHub Actions run: `24961649385` (`Deploy to GitHub Pages`) success
+- 최신 배포 커밋: `fc3d1e5e2543ec84f5824ba5bef7901ebe51ebdc`
+- GitHub Actions run: `24995409149` (`Deploy to GitHub Pages`) success
 - 실제 Pages URL: `https://lee9387-hm.github.io/jeju-family-trip-dashboard/`
 - 캐시 우회 확인 URL: `https://lee9387-hm.github.io/jeju-family-trip-dashboard/?v=1270bcf`
 - 원격 HTML에서 최신 번들 로드 확인:
@@ -39,14 +44,9 @@
   - `output/playwright/remote-apple-mobile-day5-current.png`
 
 ## Supabase 상태
-- **진단 결과**: REST API 호출(`curl.exe`) 결과 `PGRST205` 에러 확인.
-  - 에러 메시지: `"Could not find the table 'public.trips' in the schema cache"`
-  - 원인: Supabase 프로젝트에 `trips` 테이블이 존재하지 않거나 Schema Cache에 반영되지 않음.
-- **Secrets 검증**: `VITE_SUPABASE_URL` 및 `VITE_SUPABASE_ANON_KEY`는 유효함(프로젝트 식별 및 인증 통과 확인).
-- **조치 사항**:
-  - `SUPABASE_SCHEMA.sql`을 멱등성(idempotent) 있게 보강함.
-  - Supabase SQL Editor에서 보강된 `SUPABASE_SCHEMA.sql`을 실행하여 테이블 및 RLS 정책 생성 필요.
-  - 테이블 생성 후에도 404가 지속될 경우 `Settings > API > Reload Schema` 실행 필요.
+- 사용자가 Supabase SQL을 입력한 뒤 REST API로 `main-trip` row 조회를 확인했다.
+- 확인 결과: `count=1`, `content.meta.version=2.5`, title=`제주도 가족여행`.
+- 배포 화면 동기화 뱃지는 `클라우드 동기화됨`으로 표시된다.
 
 ## 검증 결과
 - `npm run lint`: 성공
@@ -56,9 +56,9 @@
 - GitHub Actions Pages 배포: 성공
 - 원격 Pages HTML/JS/CSS 확인: 성공
 - 원격 Pages 모바일 날짜 해시 이동 `#day-5`: 성공
+- Supabase `trips.main-trip` row 조회: 성공
 
 ## 남은 작업
-- [ ] Supabase 대시보드 또는 service role 권한으로 `trips` 테이블 존재 여부 확인.
-- [ ] `SUPABASE_SCHEMA.sql` 기준으로 테이블/RLS/policy가 실제 프로젝트에 적용되어 있는지 확인.
-- [ ] GitHub Secrets `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`가 현재 Supabase 프로젝트와 일치하는지 값 노출 없이 재확인.
-
+- [x] Supabase `trips` 테이블과 `main-trip` row 접근 확인.
+- [x] 배포 화면 클라우드 동기화 뱃지 확인.
+- [ ] 실제 여행 전 페리 운항 시간과 식당 운영시간은 전날 재확인.
