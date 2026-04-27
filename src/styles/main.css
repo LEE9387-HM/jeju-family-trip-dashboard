@@ -1083,6 +1083,7 @@ a {
 
 .timeline-main {
   min-width: 0;
+  padding-left: 14px;
 }
 
 .timeline-meta {
@@ -1357,6 +1358,7 @@ a {
     grid-column: 2;
     justify-content: flex-start;
     min-width: 0;
+    padding-left: 16px;
   }
 
   .timeline-actions .map-link {
